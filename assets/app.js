@@ -158,6 +158,26 @@ function paintCheckout() {
 
   const sum = document.querySelector("#pay-total");
   if (sum) sum.textContent = won(Cart.total());
+  const checkoutItems = Cart.read()
+    .map(i => ({ product: findProduct(i.id), qty: i.qty }))
+    .filter(i => i.product);
+  const checkoutValue = checkoutItems.reduce((total, i) => total + i.product.price * 0.9 * i.qty, 0);
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ ecommerce: null });
+  window.dataLayer.push({
+    event: "begin_checkout",
+    free_shipping: checkoutValue >= 40000 ? "yes" : "no",
+    ecommerce: {
+      currency: "KRW",
+      value: checkoutValue,
+      items: checkoutItems.map(i => ({
+        item_id: i.product.id,
+        item_name: i.product.name,
+        price: i.product.price,
+        quantity: i.qty
+      }))
+    }
+  });
 
   form.addEventListener("submit", e => {
     e.preventDefault();
