@@ -183,6 +183,27 @@ function paintCheckout() {
     e.preventDefault();
 
     // ▼ 여기에 「결제를 시작했다」를 알리는 코드가 들어갑니다 (뒤 수업에서)
+    const purchaseItems = Cart.read()
+      .map(i => ({ product: findProduct(i.id), qty: i.qty }))
+      .filter(i => i.product);
+    const purchaseValue = purchaseItems.reduce((total, i) => total + i.product.price * 0.9 * i.qty, 0);
+    const transactionId = "ORD-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10);
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ ecommerce: null });
+    window.dataLayer.push({
+      event: "purchase",
+      ecommerce: {
+        transaction_id: transactionId,
+        currency: "KRW",
+        value: purchaseValue,
+        items: purchaseItems.map(i => ({
+          item_id: i.product.id,
+          item_name: i.product.name,
+          price: i.product.price,
+          quantity: i.qty
+        }))
+      }
+    });
 
     Cart.clear();
     location.href = "done.html";
